@@ -1,0 +1,48 @@
+name: Facebook Account Creator (Stealth Mode)
+
+on:
+  # هذا يضيف زر 'Run Workflow' على صفحة GitHub ويسألك عن المدخلات
+  workflow_dispatch:
+    inputs:
+      num_accounts:
+        description: '💡 كم عدد الحسابات التي تريد إنشائها؟'
+        required: true
+        default: '5' 
+      password:
+        description: '🔑 كلمة المرور الموحدة للحسابات'
+        required: true
+
+jobs:
+  create_accounts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ سحب الكود (Checkout Repository)
+        uses: actions/checkout@v4
+
+      - name: 🐍 إعداد بيئة Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: ⚙️ تثبيت المتطلبات (Playwright, Requests, Faker)
+        run: |
+          pip install playwright requests faker
+          playwright install --with-chromium
+
+      - name: 🚀 تشغيل السكريبت وبدء الأتمتة
+        env:
+          # تمرير المدخلات من واجهة GitHub إلى متغيرات البيئة التي يقرأها الكود
+          INPUT_NUM_ACCOUNTS: ${{ github.event.inputs.num_accounts }}
+          INPUT_PASSWORD: ${{ github.event.inputs.password }}
+        run: |
+          python facebook_creator.py
+
+      - name: 📤 رفع المخرجات (الحسابات الناجحة والفاشلة)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Accounts_Output_${{ github.run_id }}
+          path: |
+            successful_accounts.txt
+            failed_accounts.txt
+          retention-days: 1
