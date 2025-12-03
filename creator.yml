@@ -45,4 +45,6 @@ jobs:
           path: |
             successful_accounts.txt
             failed_accounts.txt
+
           retention-days: 1
+          
